@@ -8,6 +8,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -16,6 +19,9 @@ import javafx.scene.shape.Box;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.text.ParseException;
+import java.util.ArrayList;
 
 public class App extends Application {
     @Override
@@ -109,6 +115,86 @@ public class App extends Application {
                 vana.show();
             }
         });
+
+        VBox vali_aktsiad = new VBox(15);
+        vali_aktsiad.setPadding(new Insets(10, 20, 5, 20));
+        Label vali = new Label("Vali endale huvipakkuv aktsia järgmisest listist:");
+        vali.setStyle("-fx-font-size:16");
+        ChoiceBox<String> cb = new ChoiceBox<>();
+        cb.getItems().addAll("AAPL","AMZN","EOLS","GOOG", "IBM", "META", "NVDA", "SNAP", "SPOT", "TSLA");
+
+        cb.setOnAction((event) -> {
+            try { // loeme sisse aktsiate andmed failist ja kuvame infot aktsiate kohta
+                VBox aktsia_info = new VBox();
+                Label viim = new Label(); // viimase hinna kuvamine
+                viim.setPadding(new Insets(10,10,0,10));
+                Label kesk = new Label(); // keskmise hinna uvamine
+                Aktsia aktsia = Fail.failist(cb.getValue(),new Aktsia(cb.getValue(),new ArrayList<>()));
+                double viimane = aktsia.viimane_hind();
+                double keskmine = aktsia.keskmine_hind();
+                // kuvame viimase ja keskmise hinna
+                viim.setText("Selle aktsia viimane hind oli " + viimane + " dollarit ehk " + aktsia.valuuta_vahetus(viimane, 0.91) + " eurot.");
+                kesk.setText("Keskmine hind viimase aasta jooksul on " + aktsia.keskmine_hind() + " dollarit ehk " +
+                        aktsia.valuuta_vahetus(keskmine, 0.91) + " eurot.");
+                viim.setFont(Font.font(15));
+                kesk.setFont(Font.font(15));
+                aktsia_info.getChildren().addAll(viim,kesk);
+                bp.setCenter(aktsia_info);
+                aktsia_info.setAlignment(Pos.TOP_CENTER);
+
+                Label tutvustus = new Label("Kui soovid näha hinna muutumist mingis vahemikus, " +
+                        "siis sisesta vahemiku algus- ja lõppkuupäev kujul '2022-06-12'. " +
+                        "Andmed algavad kuupäevast 2022-03-07 ja lõppevad 2023-03-03. " +
+                        "Mõned kuupäevad võivad olla puudu ning programm võib " +
+                        "seetõttu anda valesid tulemusi.");
+                tutvustus.setWrapText(true);
+                tutvustus.setPadding(new Insets(10,15,10,15));
+                tutvustus.setFont(Font.font(15));
+                aktsia_info.getChildren().add(tutvustus);
+                Label algus_tekst = new Label("Alguskuupäev: ");
+                TextField algus_kp = new TextField();
+                algus_kp.setPromptText("2022-03-07");
+                Label lõpp_tekst = new Label("Lõpukuupäev: ");
+                TextField lõpp_kp = new TextField();
+                lõpp_kp.setPromptText("2023-03-03");
+                HBox hb1 = new HBox();
+                HBox hb2 = new HBox();
+                hb1.getChildren().addAll(algus_tekst,algus_kp);
+                hb2.getChildren().addAll(lõpp_tekst,lõpp_kp);
+                aktsia_info.getChildren().addAll(hb1,hb2);
+                hb1.setAlignment(Pos.CENTER);
+                hb2.setAlignment(Pos.CENTER);
+
+                Button kuva_muutus = new Button("Näita!");
+                aktsia_info.getChildren().add(kuva_muutus);
+
+                kuva_muutus.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        // see vajab korrastamist
+                        try {
+                            double muutus = aktsia.hinnamuutus(algus_kp.getText(),lõpp_kp.getText());
+                            Label muut = new Label("Hind muutus ajavahemikul " + algus_kp.getText() +
+                                    " kuni " + lõpp_kp.getText() + " " + muutus + " dollarit.");
+                            muut.setFont(new Font(15));
+                            muut.setWrapText(true);
+                            aktsia_info.getChildren().add(muut);
+                        }
+                        catch (ParseException e){
+                            throw new RuntimeException();
+                        }
+                    }
+                });
+
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        vali_aktsiad.getChildren().addAll(vali, cb);
+        bp.setTop(vali_aktsiad);
+        vali_aktsiad.setAlignment(Pos.CENTER);
         Scene stseen = new Scene(bp, 535, 535, Color.SNOW);
         uus.setScene(stseen);
         uus.show();
