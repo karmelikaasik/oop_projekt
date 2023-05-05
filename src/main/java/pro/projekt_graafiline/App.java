@@ -48,7 +48,7 @@ public class App extends Application {
             @Override
             public void handle(ActionEvent event) {
                 Stage uus = new Stage();
-                aken_kulud_tulud(uus);
+                aken_kulud_tulud(uus, lava);
                 lava.hide();
             }
         });
@@ -80,8 +80,19 @@ public class App extends Application {
         return bp;
     }
 
-    private static void aken_kulud_tulud(Stage uus){ // kulude ja tulude sisestamise aken
-        Scene stseen = new Scene(new Group(), 535, 535, Color.SNOW);
+    private static void aken_kulud_tulud(Stage uus, Stage vana){ // kulude ja tulude sisestamise aken
+        BorderPane bp = new BorderPane();
+        Button tagasi = new Button("Tagasi");
+        bp.setBottom(tagasi);
+        BorderPane.setAlignment(tagasi,Pos.TOP_LEFT);
+        tagasi.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                uus.hide();
+                vana.show();
+            }
+        });
+        Scene stseen = new Scene(bp, 535, 535, Color.SNOW);
         uus.setScene(stseen);
         uus.show();
     }
