@@ -1,0 +1,12 @@
+-350,üür
++350,emalt
+-30,toit
+-100,kommunaalid
++750,palk
+-30,toit
+-50,toit
++120,toetused
++150,isalt
+-40,toit
+-20,ravimid
+-80,kütus
