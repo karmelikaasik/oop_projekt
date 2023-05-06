@@ -2,28 +2,25 @@ package pro.projekt_graafiline;
 import java.io.File;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Peaklass {
     public static void main(String[] args) throws Exception{
         ArrayList<Inimene> inimesed = new ArrayList<>(); // arraylist Inimene objektide hoidmiseks
         loe_failid(inimesed); // loeb sisse varasemalt programmi kasutanud isikute andmed
-        System.out.println("""
+        /*System.out.println("""
                 Tere tulemast kasutama meie programmi!\s
                 Mida soovid teha?\s
                 Sisestada tulusid ja kulusid : kirjuta '1' \s
                 Uurida aktate kohta : kirjuta '2' \s
                 Programmist lahkumiseks vajuta 'enter' nuppu
                  """);
-        peamine(inimesed);
+        peamine(inimesed);*/
     }
 
     public static void loe_failid(ArrayList<Inimene> inimesed) throws Exception {
-        File folder = new File("kasutajad");
-        // File folder = new File("kasutajad\\");
+        //File folder = new File("kasutajad");
+        File folder = new File("kasutajad\\");
         File[] listOfFiles = folder.listFiles();
         for (File file : listOfFiles) {
             Inimene isik = new Inimene("nimi", "isikukood");

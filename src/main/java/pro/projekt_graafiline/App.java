@@ -17,8 +17,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 public class App extends Application {
     @Override
@@ -51,7 +55,11 @@ public class App extends Application {
             @Override
             public void handle(ActionEvent event) {
                 Stage uus = new Stage();
-                aken_kulud_tulud(uus, lava);
+                try {
+                    aken_kulud_tulud(uus, lava);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 lava.hide();
             }
         });
@@ -83,7 +91,7 @@ public class App extends Application {
         return bp;
     }
 
-    private static void aken_kulud_tulud(Stage uus, Stage vana){ // kulude ja tulude sisestamise aken
+    private static void aken_kulud_tulud(Stage uus, Stage vana) throws Exception { // kulude ja tulude sisestamise aken
         BorderPane bp = new BorderPane();
         Button tagasi = new Button("Tagasi");
         bp.setBottom(tagasi);
@@ -95,9 +103,206 @@ public class App extends Application {
                 vana.show();
             }
         });
+
+        //kõigepealt sisselogimise aken, kus inimene sisestab enda nime ja isikukoodi
+        VBox aken = new VBox(15);
+        aken.setPadding(new Insets(10, 20, 5, 20));
+
+        HBox hb1 = new HBox();
+        hb1.setSpacing(10);
+        HBox hb2 = new HBox();
+        hb1.setSpacing(10);
+
+        Label tutvustus = new Label("Esmalt kirjuta, kes sa oled.");
+        tutvustus.setStyle("-fx-font-size:16");
+
+        Label nimi = new Label("Nimi: ");
+        TextField nime_koht = new TextField();
+        Label id = new Label("Isikukood: ");
+        TextField id_koht = new TextField();
+
+        hb1.getChildren().addAll(nimi, nime_koht);
+        hb2.getChildren().addAll(id,id_koht);
+        hb1.setAlignment(Pos.CENTER);
+        hb2.setAlignment(Pos.CENTER);
+
+        Button edasi = new Button("Edasi");
+        edasi.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                Stage sisestus = new Stage();
+                try {
+                    kulu_tulu_sisestus_aken(sisestus,uus, nime_koht,id_koht);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        aken.getChildren().addAll(tutvustus, hb1, hb2, edasi);
+        bp.setCenter(aken);
+        aken.setAlignment(Pos.CENTER);
         Scene stseen = new Scene(bp, 535, 535, Color.SNOW);
         uus.setScene(stseen);
         uus.show();
+    }
+
+    private static void kulu_tulu_sisestus_aken(Stage uus, Stage vana, TextField nime_koht, TextField id_koht) throws Exception {
+        BorderPane bp2 = new BorderPane(); // peamine paigutusvahend
+        Button tagasi = new Button("Tagasi");
+        bp2.setLeft(tagasi);
+        BorderPane.setAlignment(tagasi,Pos.BOTTOM_LEFT);
+        tagasi.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                uus.hide();
+                vana.show();
+            }
+        });
+
+        ArrayList<Inimene> inimesed = new ArrayList<>(); // arraylist Inimene objektide hoidmiseks
+        Peaklass.loe_failid(inimesed);
+        Map<String,String> isikud = new HashMap<>();
+        for (Inimene inimene : inimesed) {
+            isikud.put(inimene.getIsikukood(),inimene.getIsikunimi());
+        }
+
+        VBox kasutajaga_suhtlemine = new VBox();
+        if (nime_koht.getText().equals("") || id_koht.getText().equals("")) vea_aken("Kumbki väli ei tohi olla tühi.", Alert.AlertType.ERROR);
+        else if (isikud.containsKey(id_koht.getText()) && !(isikud.get(id_koht.getText()).equals(nime_koht.getText()))){
+            // kui isikukoodile ei vasta sisestatud nimi, siis anname vastava teate
+            vea_aken("Sellise isikukoodiga on seotud teine nimi.", Alert.AlertType.ERROR);
+        }
+        else {
+            Label tere = new Label();
+            tere.setStyle("-fx-font-size:16");
+            Inimene kasutaja = new Inimene(id_koht.getText(), nime_koht.getText());
+            boolean olemas = false;
+            for (Inimene isik : inimesed) {
+                if (isik.getIsikunimi().equals(kasutaja.getIsikunimi()) && isik.getIsikukood().equals(kasutaja.getIsikukood())) {
+                    // kui kahel Inimene objektil on sama nimi ja isikukood siis on nad samad
+                    kasutaja = isik;
+                    olemas = true;
+                    tere.setText("Tere taas, "+kasutaja.getIsikunimi());
+                }
+            }
+            if (!olemas) {
+                inimesed.add(kasutaja); // kui kasutajat veel pole, siis lisame
+                tere.setText("Tere, "+kasutaja.getIsikunimi());
+            }
+
+            Label küsimus_sisestusViis = new Label( "Kas soovid enda tulusid ja kulusid sisestada failist või käsitsi?");
+            küsimus_sisestusViis.setStyle("-fx-font-size:16");
+            kasutajaga_suhtlemine.getChildren().addAll(tere, küsimus_sisestusViis);
+
+            ChoiceBox<String> cb2 = new ChoiceBox<>(); //valikukast "käsitsi" või "failist"
+            cb2.getItems().addAll("Käsitsi", "Failist");
+
+            Inimene finalKasutaja = kasutaja; // anonüümne klass soovib final-tüüpi Inimene-objekti
+            cb2.setOnAction((event2) -> {
+                if (cb2.getValue().equals("Käsitsi")){ //kui käsitsi soovib sisestada
+                    VBox käsitsi = new VBox();
+                    käsitsi.setPadding(new Insets(20,60,20,0));
+                    käsitsi.setSpacing(15);
+                    HBox hb4 = new HBox(5); // liigi jaoks
+                    HBox hb5 = new HBox(5); // summa jaoks
+                    HBox hb6 = new HBox(5); // märksõna jaoks
+
+                    Label liik = new Label("Liik");
+                    Label summa = new Label("Summa");
+                    Label selgitus = new Label("Selgitus");
+                    TextField liigi_koht = new TextField();
+                    liigi_koht.setPromptText("kulu/tulu");
+                    TextField summa_koht = new TextField();
+                    Random rand = new Random();
+                    Double suvaarv = rand.nextDouble(10,100);
+                    summa_koht.setPromptText(String.valueOf(suvaarv));
+                    TextField selgituse_koht = new TextField();
+                    selgituse_koht.setPromptText("üür");
+
+                    Button kuva = new Button("Salvesta ja kuva mu rahaline seis!");
+
+                    Label raha = new Label();
+                    raha.setFont(new Font(16));
+                    kuva.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            if (liigi_koht.getText().equals("kulu")){
+                                Kulu kulu = new Kulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
+                                ArrayList<Kulu> kulud = finalKasutaja.getInimeseKulud();
+                                kulud.add(kulu);
+                                finalKasutaja.setInimeseKulud(kulud);
+                            }
+                            else if (liigi_koht.getText().equals("tulu")){
+                                Tulu tulu = new Tulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
+                                ArrayList<Tulu> tulud = finalKasutaja.getInimeseTulud();
+                                tulud.add(tulu);
+                                finalKasutaja.setInimeseTulud(tulud);
+                            }
+                            raha.setText(finalKasutaja.toString());
+                            try {
+                                finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+".bin");
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    });
+
+                    hb4.getChildren().addAll(liik, liigi_koht);
+                    hb5.getChildren().addAll(summa, summa_koht);
+                    hb6.getChildren().addAll(selgitus, selgituse_koht);
+                    hb4.setAlignment(Pos.CENTER);
+                    hb5.setAlignment(Pos.CENTER);
+                    hb6.setAlignment(Pos.CENTER);
+
+                    käsitsi.getChildren().addAll(hb4, hb5, hb6, kuva, raha);
+                    bp2.setCenter(käsitsi);
+                    käsitsi.setAlignment(Pos.TOP_CENTER);
+                    BorderPane.setAlignment(käsitsi,Pos.CENTER);
+                }
+                else { //kui failist
+                    VBox failist = new VBox();
+                    failist.setPadding(new Insets(20,60,20,0));
+                    failist.setSpacing(15);
+                    HBox hb3 = new HBox();
+                    Label faili_naide = new Label("Sisesta failinimi kujul 'fail.txt': ");
+                    Label fail = new Label("Failinimi: ");
+                    TextField faili_koht = new TextField();
+                    Button edasi2 = new Button("Edasi");
+                    Label raha = new Label();
+                    raha.setFont(new Font(16));
+                    edasi2.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            try {
+                                Fail.andmed_isikule(faili_koht.getText(), finalKasutaja);
+                                raha.setText(finalKasutaja.toString());
+                                try {
+                                    finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+".bin");
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            } catch (Exception e) {
+                                vea_aken("Vigane või puuduv failinimi", Alert.AlertType.ERROR);
+                            }
+                        }
+                    });
+
+                    hb3.getChildren().addAll(fail, faili_koht);
+                    hb3.setAlignment(Pos.CENTER);
+                    BorderPane.setAlignment(hb3,Pos.CENTER);
+                    failist.getChildren().addAll(faili_naide,hb3, edasi2, raha);
+                    bp2.setCenter(failist);
+                    failist.setAlignment(Pos.TOP_CENTER);
+                }
+            });
+
+            kasutajaga_suhtlemine.getChildren().addAll(cb2);
+            bp2.setTop(kasutajaga_suhtlemine);
+            kasutajaga_suhtlemine.setAlignment(Pos.TOP_CENTER);
+            vana.hide();
+            Scene stseen2 = new Scene(bp2, 535, 535, Color.SNOW);
+            uus.setScene(stseen2);
+            uus.show();
+        }
     }
 
     private static void aken_aktsiad(Stage uus, Stage vana){ // ahtsiate kohta uurimise aken
