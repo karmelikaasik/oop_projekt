@@ -7,10 +7,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -148,7 +145,7 @@ public class App extends Application {
                         "Mõned kuupäevad võivad olla puudu ning programm võib " +
                         "seetõttu anda valesid tulemusi.");
                 tutvustus.setWrapText(true);
-                tutvustus.setPadding(new Insets(10,15,10,15));
+                tutvustus.setPadding(new Insets(10,20,10,20));
                 tutvustus.setFont(Font.font(15));
                 aktsia_info.getChildren().add(tutvustus);
                 Label algus_tekst = new Label("Alguskuupäev: ");
@@ -167,26 +164,28 @@ public class App extends Application {
 
                 Button kuva_muutus = new Button("Näita!");
                 aktsia_info.getChildren().add(kuva_muutus);
+                Label muut = new Label();
+                aktsia_info.getChildren().add(muut);
 
                 kuva_muutus.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        // see vajab korrastamist
                         try {
                             double muutus = aktsia.hinnamuutus(algus_kp.getText(),lõpp_kp.getText());
-                            Label muut = new Label("Hind muutus ajavahemikul " + algus_kp.getText() +
-                                    " kuni " + lõpp_kp.getText() + " " + muutus + " dollarit.");
+                            muut.setText("Hind muutus ajavahemikul " + algus_kp.getText() +
+                                    " kuni " + lõpp_kp.getText() + "\n" + muutus + " dollarit.");
                             muut.setFont(new Font(15));
+                            muut.setPadding(new Insets(10,20,10,20));
                             muut.setWrapText(true);
-                            aktsia_info.getChildren().add(muut);
                         }
                         catch (ParseException e){
-                            throw new RuntimeException();
+                            vea_aken("Kuupäev ei ole kujul 'YYYY-MM-DD'", Alert.AlertType.ERROR);
+                        }
+                        catch (ValeKuupäevException e){
+                            vea_aken(e.getMessage(), Alert.AlertType.ERROR);
                         }
                     }
                 });
-
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -198,6 +197,12 @@ public class App extends Application {
         Scene stseen = new Scene(bp, 535, 535, Color.SNOW);
         uus.setScene(stseen);
         uus.show();
+    }
+
+    public static void vea_aken(String sõnum, Alert.AlertType tüüp){ // errorite kuvamiseks kasutajale
+        Alert viga = new Alert(tüüp);
+        viga.setContentText(sõnum);
+        viga.show();
     }
 
     public static void main(String[] args) {

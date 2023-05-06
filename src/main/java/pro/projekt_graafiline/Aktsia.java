@@ -49,7 +49,7 @@ public class Aktsia {
         SimpleDateFormat aeg = new SimpleDateFormat("yyyy-MM-dd");
         double algus_summa = 0;
         double lõpp_summa = 0;
-        if (aeg.parse(aeg_lõpp).compareTo(aeg.parse(aeg_algus)) >0 ){
+        if (aeg.parse(aeg_lõpp).compareTo(aeg.parse(aeg_algus)) > 0 ){
             // algusaeg peab olema varasem kui lõppaeg
             for (String s : andmed) {
                 String[] osad = s.split(",");
@@ -59,11 +59,11 @@ public class Aktsia {
                 else if (osad[0].equals(aeg_lõpp)){
                     lõpp_summa = Double.parseDouble(osad[4]);}
             }
-            return lõpp_summa - algus_summa;
+            return Math.round(lõpp_summa - algus_summa);
         }
         else {
-            System.out.println("Sobimatu ajavahemik");
-            return Double.NaN;
+            // System.out.println("Sobimatu ajavahemik");
+            throw new ValeKuupäevException("Lõppaeg peab olema varasem algusajast");
         }
     }
 }
