@@ -445,13 +445,13 @@ public class App extends Application {
         }
     }
 
-    public static void vea_aken(String sõnum, Alert.AlertType tüüp){ // errorite kuvamiseks kasutajale
+    private static void vea_aken(String sõnum, Alert.AlertType tüüp){ // errorite kuvamiseks kasutajale
         Alert viga = new Alert(tüüp);
         viga.setContentText(sõnum);
         viga.show();
     }
 
-    public static void main(String[] args) {
+    private static void main(String[] args) {
         launch();
     }
 }
