@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -224,39 +225,20 @@ public class App extends Application {
 
                     Label raha = new Label();
                     raha.setFont(new Font(16));
+                    selgituse_koht.setOnKeyPressed(new EventHandler<KeyEvent>() {
+                        // viimase tekstikasti sees enteri vajutamine teeb sama asja, mida allolevale nupule vajutamine
+                        @Override
+                        public void handle(KeyEvent keyEvent) {
+                            if (keyEvent.getCode() == KeyCode.ENTER) {
+                                käsitsi_sisestus_regeering(liigi_koht,summa_koht,finalKasutaja,raha);
+                            }
 
+                        }
+                    });
                     kuva.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
-                            if (liigi_koht.getText().equalsIgnoreCase("kulu")){
-                                try {
-                                    Kulu kulu = new Kulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
-                                    ArrayList<Kulu> kulud = finalKasutaja.getInimeseKulud();
-                                    kulud.add(kulu);
-                                    finalKasutaja.setInimeseKulud(kulud);
-                                }
-                                catch (NumberFormatException e){
-                                    vea_aken("Summa ei ole numbriline.", Alert.AlertType.ERROR);
-                                }
-                            }
-                            else if (liigi_koht.getText().equalsIgnoreCase("tulu")){
-                                try{
-                                    Tulu tulu = new Tulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
-                                    ArrayList<Tulu> tulud = finalKasutaja.getInimeseTulud();
-                                    tulud.add(tulu);
-                                    finalKasutaja.setInimeseTulud(tulud);
-                                }
-                                catch (NumberFormatException e){
-                                    vea_aken("Summa ei ole numbriline.", Alert.AlertType.ERROR);
-                                }
-                            }
-                            else vea_aken("Vale tulu liigi sisend, sisesta 'tulu' või 'kulu'.", Alert.AlertType.ERROR);
-                            raha.setText(finalKasutaja.toString());
-                            try {
-                                finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+".bin");
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
+                            käsitsi_sisestus_regeering(liigi_koht,summa_koht,finalKasutaja,raha);
                         }
                     });
 
@@ -317,6 +299,37 @@ public class App extends Application {
             uus.setScene(stseen2);
             uus.setResizable(false);
             uus.show();
+        }
+    }
+    private static void käsitsi_sisestus_regeering(TextField liigi_koht, TextField summa_koht, Inimene finalKasutaja, Label raha){
+        if (liigi_koht.getText().equalsIgnoreCase("kulu")){
+            try {
+                Kulu kulu = new Kulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
+                ArrayList<Kulu> kulud = finalKasutaja.getInimeseKulud();
+                kulud.add(kulu);
+                finalKasutaja.setInimeseKulud(kulud);
+            }
+            catch (NumberFormatException e){
+                vea_aken("Summa ei ole numbriline.", Alert.AlertType.ERROR);
+            }
+        }
+        else if (liigi_koht.getText().equalsIgnoreCase("tulu")){
+            try{
+                Tulu tulu = new Tulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
+                ArrayList<Tulu> tulud = finalKasutaja.getInimeseTulud();
+                tulud.add(tulu);
+                finalKasutaja.setInimeseTulud(tulud);
+            }
+            catch (NumberFormatException e){
+                vea_aken("Summa ei ole numbriline.", Alert.AlertType.ERROR);
+            }
+        }
+        else vea_aken("Vale tulu liigi sisend, sisesta 'tulu' või 'kulu'.", Alert.AlertType.ERROR);
+        raha.setText(finalKasutaja.toString());
+        try {
+            finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+".bin");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -387,23 +400,18 @@ public class App extends Application {
                 Label muut = new Label();
                 aktsia_info.getChildren().add(muut);
 
+                lõpp_kp.setOnKeyPressed(new EventHandler<KeyEvent>() {
+                    @Override
+                    public void handle(KeyEvent event) {
+                        if (event.getCode() == KeyCode.ENTER){
+                            aktsiate_muutumine_regeering(aktsia,algus_kp,lõpp_kp,muut);
+                        }
+                    }
+                });
                 kuva_muutus.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        try {
-                            double muutus = aktsia.hinnamuutus(algus_kp.getText(),lõpp_kp.getText());
-                            muut.setText("Hind muutus ajavahemikul " + algus_kp.getText() +
-                                    " kuni " + lõpp_kp.getText() + "\n" + muutus + " dollarit.");
-                            muut.setFont(new Font(15));
-                            muut.setPadding(new Insets(10,20,10,20));
-                            muut.setWrapText(true);
-                        }
-                        catch (ParseException e){
-                            vea_aken("Kuupäev ei ole kujul 'YYYY-MM-DD'", Alert.AlertType.ERROR);
-                        }
-                        catch (ValeKuupäevException e){
-                            vea_aken(e.getMessage(), Alert.AlertType.ERROR);
-                        }
+                        aktsiate_muutumine_regeering(aktsia,algus_kp,lõpp_kp,muut);
                     }
                 });
             } catch (Exception e) {
@@ -418,6 +426,23 @@ public class App extends Application {
         uus.setScene(stseen);
         uus.setResizable(false);
         uus.show();
+    }
+
+    private static void aktsiate_muutumine_regeering(Aktsia aktsia, TextField algus_kp,TextField lõpp_kp, Label muut){
+        try {
+            double muutus = aktsia.hinnamuutus(algus_kp.getText(),lõpp_kp.getText());
+            muut.setText("Hind muutus ajavahemikul " + algus_kp.getText() +
+                    " kuni " + lõpp_kp.getText() + "\n" + muutus + " dollarit.");
+            muut.setFont(new Font(15));
+            muut.setPadding(new Insets(10,20,10,20));
+            muut.setWrapText(true);
+        }
+        catch (ParseException e){
+            vea_aken("Kuupäev ei ole kujul 'YYYY-MM-DD'", Alert.AlertType.ERROR);
+        }
+        catch (ValeKuupäevException e){
+            vea_aken(e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     public static void vea_aken(String sõnum, Alert.AlertType tüüp){ // errorite kuvamiseks kasutajale
