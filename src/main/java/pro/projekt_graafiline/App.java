@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -141,6 +142,7 @@ public class App extends Application {
         bp.setCenter(aken);
         aken.setAlignment(Pos.CENTER);
         Scene stseen = new Scene(bp, 535, 535, Color.SNOW);
+        uus.setResizable(false);
         uus.setScene(stseen);
         uus.show();
     }
@@ -222,21 +224,33 @@ public class App extends Application {
 
                     Label raha = new Label();
                     raha.setFont(new Font(16));
+
                     kuva.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
-                            if (liigi_koht.getText().equals("kulu")){
-                                Kulu kulu = new Kulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
-                                ArrayList<Kulu> kulud = finalKasutaja.getInimeseKulud();
-                                kulud.add(kulu);
-                                finalKasutaja.setInimeseKulud(kulud);
+                            if (liigi_koht.getText().equalsIgnoreCase("kulu")){
+                                try {
+                                    Kulu kulu = new Kulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
+                                    ArrayList<Kulu> kulud = finalKasutaja.getInimeseKulud();
+                                    kulud.add(kulu);
+                                    finalKasutaja.setInimeseKulud(kulud);
+                                }
+                                catch (NumberFormatException e){
+                                    vea_aken("Summa ei ole numbriline.", Alert.AlertType.ERROR);
+                                }
                             }
-                            else if (liigi_koht.getText().equals("tulu")){
-                                Tulu tulu = new Tulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
-                                ArrayList<Tulu> tulud = finalKasutaja.getInimeseTulud();
-                                tulud.add(tulu);
-                                finalKasutaja.setInimeseTulud(tulud);
+                            else if (liigi_koht.getText().equalsIgnoreCase("tulu")){
+                                try{
+                                    Tulu tulu = new Tulu(liigi_koht.getText(), Double.parseDouble(summa_koht.getText()));
+                                    ArrayList<Tulu> tulud = finalKasutaja.getInimeseTulud();
+                                    tulud.add(tulu);
+                                    finalKasutaja.setInimeseTulud(tulud);
+                                }
+                                catch (NumberFormatException e){
+                                    vea_aken("Summa ei ole numbriline.", Alert.AlertType.ERROR);
+                                }
                             }
+                            else vea_aken("Vale tulu liigi sisend, sisesta 'tulu' või 'kulu'.", Alert.AlertType.ERROR);
                             raha.setText(finalKasutaja.toString());
                             try {
                                 finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+".bin");
@@ -301,6 +315,7 @@ public class App extends Application {
             vana.hide();
             Scene stseen2 = new Scene(bp2, 535, 535, Color.SNOW);
             uus.setScene(stseen2);
+            uus.setResizable(false);
             uus.show();
         }
     }
@@ -401,6 +416,7 @@ public class App extends Application {
         vali_aktsiad.setAlignment(Pos.CENTER);
         Scene stseen = new Scene(bp, 535, 535, Color.SNOW);
         uus.setScene(stseen);
+        uus.setResizable(false);
         uus.show();
     }
 
