@@ -1,11 +1,10 @@
-package pro.projekt_graafiline.projekt;
+package pro.projekt_graafiline;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -14,11 +13,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Box;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import pro.projekt_graafiline.projekt.*;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -27,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class App extends Application {
+public class Programm extends Application {
     @Override
     public void start(Stage peaLava) {
         Scene stseen1 = new Scene(esimene_aken(peaLava), 535, 535, Color.SNOW);
@@ -133,7 +130,7 @@ public class App extends Application {
 
         //Kasutaja võib enter vajutada nii nime kui ka id kasti peal, oluline on et mõlemad kastid oleksid täidetud
         id_koht.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            // viimase tekstikasti sees enteri vajutamine teeb sama asja, mida allolevale nupule vajutamine
+            // tekstikasti sees enteri vajutamine teeb sama asja, mida allolevale nupule vajutamine
             @Override
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.ENTER) {
@@ -154,11 +151,8 @@ public class App extends Application {
             }
         });
 
-
-
         edasi.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                Stage sisestus = new Stage();
                 sisselogimise_reageering(id_koht, uus, nime_koht);
             }
         });
@@ -172,7 +166,7 @@ public class App extends Application {
         uus.show();
     }
 
-    private static void kulu_tulu_sisestus_aken(Stage uus, Stage vana, TextField nime_koht, TextField id_koht) throws Exception {
+    private static void kulu_tulu_sisestuse_aken(Stage uus, Stage vana, TextField nime_koht, TextField id_koht) throws Exception {
         BorderPane bp2 = new BorderPane(); // peamine paigutusvahend
         Button tagasi = new Button("Tagasi");
         bp2.setLeft(tagasi);
@@ -223,7 +217,7 @@ public class App extends Application {
             ChoiceBox<String> cb2 = new ChoiceBox<>(); //valikukast "käsitsi" või "failist"
             cb2.getItems().addAll("Käsitsi", "Failist");
 
-            Inimene finalKasutaja = kasutaja; // anonüümne klass soovib final-tüüpi Inimene-objekti
+            final Inimene finalKasutaja = kasutaja; // anonüümne klass soovib final-tüüpi Inimene-objekti
             cb2.setOnAction((event2) -> {
                 if (cb2.getValue().equals("Käsitsi")){ //kui käsitsi soovib sisestada
                     VBox käsitsi = new VBox();
@@ -249,11 +243,10 @@ public class App extends Application {
 
                     Label raha = new Label();
                     raha.setFont(new Font(16));
-                    //Enter vajutamine toimib iga kasti peal, oluline ainult, et kõik kastid oleksid täidetud
-                    //ning et liik oleks korrektselt kirjutatud
+                    //Enter vajutamine ükskõik millise kasti peal teeb sama asja, mida nupu 'kuva' vajutamine,
+                    // oluline ainult, et kõik kastid oleksid täidetud
 
                    liigi_koht.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                        // viimase tekstikasti sees enteri vajutamine teeb sama asja, mida allolevale nupule vajutamine
                         @Override
                         public void handle(KeyEvent keyEvent) {
                             if (keyEvent.getCode() == KeyCode.ENTER) {
@@ -262,9 +255,7 @@ public class App extends Application {
 
                         }
                     });
-
                     summa_koht.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                        // viimase tekstikasti sees enteri vajutamine teeb sama asja, mida allolevale nupule vajutamine
                         @Override
                         public void handle(KeyEvent keyEvent) {
                             if (keyEvent.getCode() == KeyCode.ENTER) {
@@ -273,9 +264,7 @@ public class App extends Application {
 
                         }
                     });
-
                     selgituse_koht.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                        // viimase tekstikasti sees enteri vajutamine teeb sama asja, mida allolevale nupule vajutamine
                         @Override
                         public void handle(KeyEvent keyEvent) {
                             if (keyEvent.getCode() == KeyCode.ENTER) {
@@ -284,10 +273,6 @@ public class App extends Application {
 
                         }
                     });
-
-
-
-
                     kuva.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
@@ -318,17 +303,13 @@ public class App extends Application {
                     Button edasi2 = new Button("Edasi");
                     Label raha = new Label();
                     raha.setFont(new Font(16));
-
                     faili_koht.setOnKeyPressed(new EventHandler<KeyEvent>(){
-                        //tekstikasti sees enteri vajutamine teeb sama asja, mida allolevale nupule vajutamine
                         public void handle(KeyEvent keyEvent) {
                             if (keyEvent.getCode() == KeyCode.ENTER) {
                                 failist_sisestus_reageering(faili_koht,finalKasutaja,raha);
                             }
-
                         }
                     } );
-
                     edasi2.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
@@ -344,7 +325,6 @@ public class App extends Application {
                     failist.setAlignment(Pos.TOP_CENTER);
                 }
             });
-
             kasutajaga_suhtlemine.getChildren().addAll(cb2);
             bp2.setTop(kasutajaga_suhtlemine);
             kasutajaga_suhtlemine.setAlignment(Pos.TOP_CENTER);
@@ -360,7 +340,7 @@ public class App extends Application {
         Stage sisestus = new Stage();
         if (!id_koht.getText().equals("") && !nime_koht.getText().equals("")) {
             try {
-                kulu_tulu_sisestus_aken(sisestus, uus, nime_koht, id_koht);
+                kulu_tulu_sisestuse_aken(sisestus, uus, nime_koht, id_koht);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -368,13 +348,14 @@ public class App extends Application {
             vea_aken("Vigane sisestus, täida kõik lüngad!", Alert.AlertType.ERROR);
         }
     }
+
     private static void failist_sisestus_reageering(TextField faili_koht, Inimene finalKasutaja, Label raha){
         if (!faili_koht.getText().equals("")) { //kontrollib kas failinimi on sisestatud
             try {
                 Fail.andmed_isikule(faili_koht.getText(), finalKasutaja);
                 raha.setText(finalKasutaja.toString());
                 try {
-                    finalKasutaja.kirjuta_faili("kasutajad\\" + finalKasutaja.getIsikunimi() + ".bin");
+                    finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+finalKasutaja.getIsikukood()+".bin");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -413,7 +394,7 @@ public class App extends Application {
         else vea_aken("Vale või puuduv sisend!", Alert.AlertType.ERROR);
         raha.setText(finalKasutaja.toString());
         try {
-            finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+".bin");
+            finalKasutaja.kirjuta_faili("kasutajad\\"+finalKasutaja.getIsikunimi()+finalKasutaja.getIsikukood()+".bin");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -488,7 +469,6 @@ public class App extends Application {
 
                 //enteri vajutamine edasi liikumiseks toimib mõlema kasti peal
                 //oluline, et mõlemad kastid oleksid täidetud ning et õigel kujul
-
                 algus_kp.setOnKeyPressed(new EventHandler<KeyEvent>() {
                     @Override
                     public void handle(KeyEvent event) {
@@ -497,7 +477,6 @@ public class App extends Application {
                         }
                     }
                 });
-
                 lõpp_kp.setOnKeyPressed(new EventHandler<KeyEvent>() {
                     @Override
                     public void handle(KeyEvent event) {
@@ -540,11 +519,10 @@ public class App extends Application {
             } catch (ValeKuupäevException e) {
                 vea_aken(e.getMessage(), Alert.AlertType.ERROR);
             }
-         } else{
+         }
+        else{
             vea_aken("Vigane sisestus, täida kõik lüngad!", Alert.AlertType.ERROR);
         }
-
-
     }
 
     private static void vea_aken(String sõnum, Alert.AlertType tüüp){ // errorite kuvamiseks kasutajale
